@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROJECT: ONGOING - Game Theory RPG</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier Prime', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ff00;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            animation: scanLines 1s infinite;
+        }
+        
+        @keyframes scanLines {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.05); }
+            100% { filter: brightness(1); }
+        }
+        
+        .ascii-art {
+            text-align: center;
+            font-size: 8px;
+            line-height: 1;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .game-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b6b;
+            text-shadow: 0 0 15px #ff6b6b;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .status-panel {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        
+        .status-title {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            color: #ffff00;
+            margin-bottom: 15px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .status-item {
+            font-size: 14px;
+            padding: 5px;
+        }
+        
+        .narrative-box {
+            background: rgba(255, 107, 107, 0.15);
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-style: italic;
+            color: #ffcc99;
+            text-shadow: 0 0 5px #ffcc99;
+        }
+        
+        .choices {
+            margin: 30px 0;
+        }
+        
+        .choice-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            color: #00ffff;
+            font-family: 'Courier Prime', monospace;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+        
+        .choice-button:hover {
+            background: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            transform: translateX(10px);
+        }
+        
+        .choice-button:active {
+            transform: scale(0.98);
+        }
+        
+        .event-log {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #666;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 14px;
+        }
+        
+        .npc-reaction {
+            background: rgba(255, 255, 0, 0.1);
+            border-left: 4px solid #ffff00;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .game-over-screen {
+            text-align: center;
+            background: rgba(255, 0, 0, 0.2);
+            border: 3px solid #ff0000;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            display: none;
+        }
+        
+        .restart-btn {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 15px 30px;
+            font-family: 'Courier Prime', monospace;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        .restart-btn:hover {
+            background: rgba(0, 255, 0, 0.4);
+            box-shadow: 0 0 10px #00ff00;
+        }
+        
+        .warning {
+            color: #ff6b6b;
+            font-weight: bold;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="ascii-art">
+╔══════════════════════════════════════════════════════════════╗<br>
+║  ____  ____   ___     _ _____ ____ _____   ___  _   _  ____  ║<br>
+║ |  _ \|  _ \ / _ \   | | ____/ ___|_   _| / _ \| \ | |/ ___| ║<br>
+║ | |_) | |_) | | | |_ | |  _|| |     | |  | | | |  \| | |  _  ║<br>
+║ |  __/|  _ <| |_| | |_| | |__| |___  | |  | |_| | |\  | |_| | ║<br>
+║ |_|   |_| \_\___/ \___/|_____\____| |_|   \___/|_| \_|\____| ║<br>
+║                                                              ║<br>
+║           ⚠️  ONGOING: A Game Theory Adventure ⚠️            ║<br>
+╚══════════════════════════════════════════════════════════════╝
+        </div>
+        
+        <div class="game-title">PROJECT: ONGOING</div>
+        
+        <div id="game-setup" class="status-panel">
+            <h3>🎯 THE SETUP</h3>
+            <p>You're part of a research team working on Project Phoenix.</p>
+            <p><strong>Goal:</strong> Achieve success while maintaining your reputation.</p>
+            <p><strong>The Dilemma:</strong></p>
+            <ul>
+                <li>→ Stopping makes YOU the "quitter" (reputation damage)</li>
+                <li>→ Continuing increases costs and risks</li>
+                <li>→ Deferring responsibility doubles risk but protects you</li>
+            </ul>
+            <p><em>The last person standing wins... or loses everything.</em></p>
+            <button class="choice-button" onclick="startGame()">🎮 START GAME</button>
+        </div>
+        
+        <div id="game-interface" style="display: none;">
+            <div class="status-panel">
+                <div class="status-title">🎯 PROJECT STATUS - TURN <span id="turn">1</span></div>
+                <div class="status-grid">
+                    <div class="status-item">💰 Investment: $<span id="investment">50,000</span></div>
+                    <div class="status-item">📈 Success: <span id="success">70.0</span>%</div>
+                    <div class="status-item">⚠️ Risk: <span id="risk">20.0</span>%</div>
+                    <div class="status-item">⭐ Reputation: <span id="reputation">100</span></div>
+                    <div class="status-item">👤 Players Left: <span id="players">4</span></div>
+                    <div class="status-item">👥 Morale: <span id="morale">80.0</span>%</div>
+                </div>
+            </div>
+            
+            <div class="narrative-box">
+                <strong>💭 Current Narrative:</strong><br>
+                <span id="narrative">"We're so close to a breakthrough! The data shows promise..."</span>
+            </div>
+            
+            <div class="choices">
+                <div style="text-align: center; margin-bottom: 20px; font-size: 18px; color: #ffff00;">
+                    🎲 Your Turn - What do you choose?
+                </div>
+                <button class="choice-button" onclick="makeChoice('continue')">
+                    🟢 CONTINUE - Invest more and push forward
+                </button>
+                <button class="choice-button" onclick="makeChoice('stop')">
+                    🔴 STOP - Be the one to end this project
+                </button>
+                <button class="choice-button" onclick="makeChoice('defer')">
+                    🟡 DEFER - Pass the decision to others
+                </button>
+            </div>
+            
+            <div id="event-log" class="event-log"></div>
+        </div>
+        
+        <div id="game-over" class="game-over-screen">
+            <h2>🎬 GAME OVER - FINAL ANALYSIS 🎬</h2>
+            <div id="ending-text"></div>
+            <div style="margin-top: 20px;">
+                <strong>🧠 COGNITIVE BIASES DEMONSTRATED:</strong><br>
+                🔹 Sunk Cost Fallacy - "We've invested too much to quit now"<br>
+                🔹 Responsibility Diffusion - "Someone else will decide"<br>
+                🔹 Framing Effects - "We're so close to success!"<br>
+                🔹 Groupthink - "Nobody wants to be the quitter"<br>
+                🔹 Loss Aversion - "Stopping feels like admitting failure"
+            </div>
+            <button class="restart-btn" onclick="restartGame()">🔄 PLAY AGAIN</button>
+        </div>
+        
+        <div class="footer">
+            💭 Remember: The most rational choice often feels the most irrational.
+        </div>
+    </div>
+
+    <script>
+        class GameState {
+            constructor() {
+                this.turn = 1;
+                this.totalInvestment = 50000;
+                this.successChance = 0.7;
+                this.riskLevel = 0.2;
+                this.playerReputation = 100;
+                this.playersLeft = 4;
+                this.teamMorale = 0.8;
+                this.gameOver = false;
+                this.eventLog = [];
+                
+                this.npcs = {
+                    "Dr. Sunk": { reputation: 100, bias: "sunk_cost", active: true },
+                    "Manager Defer": { reputation: 100, bias: "responsibility_avoid", active: true },
+                    "Prof. Frame": { reputation: 100, bias: "framing", active: true }
+                };
+                
+                this.narratives = [
+                    "We're so close to a breakthrough! The data shows promise...",
+                    "Canceling now would waste all our progress so far.",
+                    "The market conditions are finally aligning in our favor.",
+                    "Our competitors are struggling - this is our chance!",
+                    "The team has worked so hard, we can't let them down now.",
+                    "Just one more investment round and we'll turn the corner."
+                ];
+            }
+            
+            updateDisplay() {
+                document.getElementById('turn').textContent = this.turn;
+                document.getElementById('investment').textContent = this.totalInvestment.toLocaleString();
+                document.getElementById('success').textContent = (this.successChance * 100).toFixed(1);
+                document.getElementById('risk').textContent = (this.riskLevel * 100).toFixed(1);
+                document.getElementById('reputation').textContent = this.playerReputation;
+                document.getElementById('players').textContent = this.playersLeft;
+                document.getElementById('morale').textContent = (this.teamMorale * 100).toFixed(1);
+                
+                // Update narrative
+                const narrative = this.narratives[Math.floor(Math.random() * this.narratives.length)];
+                document.getElementById('narrative').textContent = `"${narrative}"`;
+            }
+            
+            logEvent(text, isNPC = false) {
+                const logDiv = document.getElementById('event-log');
+                const eventDiv = document.createElement('div');
+                eventDiv.className = isNPC ? 'npc-reaction' : '';
+                eventDiv.innerHTML = text;
+                logDiv.appendChild(eventDiv);
+                logDiv.scrollTop = logDiv.scrollHeight;
+            }
+            
+            npcDecision(npc, data) {
+                if (!data.active) return null;
+                
+                let continueWeight, stopWeight, deferWeight;
+                
+                switch (data.bias) {
+                    case "sunk_cost":
+                        continueWeight = Math.min(0.8, this.totalInvestment / 100000);
+                        stopWeight = 0.1;
+                        deferWeight = 0.1;
+                        break;
+                    case "responsibility_avoid":
+                        continueWeight = 0.3;
+                        stopWeight = 0.1;
+                        deferWeight = 0.6;
+                        break;
+                    case "framing":
+                        continueWeight = this.successChance > 0.3 ? 0.6 : 0.2;
+                        stopWeight = 0.2;
+                        deferWeight = 0.2;
+                        break;
+                }
+                
+                const roll = Math.random();
+                if (roll < continueWeight) return "continue";
+                if (roll < continueWeight + stopWeight) return "stop";
+                return "defer";
+            }
+            
+            executeNPCTurns() {
+                const activeNPCs = Object.entries(this.npcs).filter(([name, data]) => data.active);
+                
+                for (const [npcName, npcData] of activeNPCs) {
+                    const decision = this.npcDecision(npcName, npcData);
+                    
+                    if (decision === "stop") {
+                        this.logEvent(`💥 <strong>${npcName}</strong> says: "I think we should stop this project."`, true);
+                        this.logEvent(`💔 ${npcName} takes a reputation hit but ends the madness!`, true);
+                        npcData.reputation -= 30;
+                        npcData.active = false;
+                        this.playersLeft--;
+                        this.gameOver = true;
+                        this.endGame("npc_stopped");
+                        return;
+                    } else if (decision === "continue") {
+                        this.logEvent(`✅ <strong>${npcName}</strong> says: "We must continue! We're so close!"`, true);
+                        if (npcName === "Dr. Sunk") {
+                            this.logEvent(`💭 <em>"We can't waste all this investment now!"</em>`, true);
+                        }
+                    } else {
+                        this.logEvent(`🔄 <strong>${npcName}</strong> says: "I'll go with whatever the team decides."`, true);
+                        this.riskLevel *= 1.3;
+                        this.logEvent(`⚠️ Risk increases due to diffused responsibility!`, true);
+                    }
+                }
+            }
+            
+            checkDisaster() {
+                const disasterChance = this.riskLevel * (1 - this.successChance);
+                
+                if (disasterChance > 0.8 || this.totalInvestment > 500000) {
+                    this.logEvent(`<div class="warning">💥💥💥 CATASTROPHIC FAILURE! 💥💥💥</div>`);
+                    this.logEvent(`🚨 Project Phoenix has crashed and burned!`);
+                    this.logEvent(`💸 Total loss: $${this.totalInvestment.toLocaleString()}`);
+                    this.logEvent(`🎭 Everyone's careers are ruined!`);
+                    
+                    this.playerReputation = 0;
+                    Object.values(this.npcs).forEach(npc => npc.reputation = 0);
+                    this.gameOver = true;
+                    this.endGame("disaster");
+                    return true;
+                }
+                return false;
+            }
+            
+            endGame(type) {
+                document.getElementById('game-interface').style.display = 'none';
+                document.getElementById('game-over').style.display = 'block';
+                
+                let endingText = "";
+                
+                switch (type) {
+                    case "player_stopped":
+                        endingText = `
+                            <h3>🎯 You chose RATIONALITY!</h3>
+                            <p>💡 You stopped the madness before disaster struck.</p>
+                            <p>💔 Reputation hit: ${100 - this.playerReputation} points</p>
+                            <p>🏆 But you saved $${this.totalInvestment.toLocaleString()} from being lost!</p>
+                            <p><strong>📚 LESSON: Sometimes being 'the bad guy' is the right choice.</strong></p>
+                        `;
+                        break;
+                    case "disaster":
+                        endingText = `
+                            <h3>💥 TOTAL SYSTEM FAILURE!</h3>
+                            <p>💸 Everyone lost everything: $${this.totalInvestment.toLocaleString()}</p>
+                            <p>🎭 All reputations destroyed by collective blindness.</p>
+                            <p><strong>📚 LESSON: When everyone avoids responsibility, disaster follows.</strong></p>
+                        `;
+                        break;
+                    case "npc_stopped":
+                        endingText = `
+                            <h3>🤖 An NPC stopped the project!</h3>
+                            <p>💡 Someone else made the rational choice.</p>
+                            <p>🎭 You avoided the reputation hit but also the responsibility.</p>
+                            <p><strong>📚 LESSON: Sometimes others have to be the voice of reason.</strong></p>
+                        `;
+                        break;
+                }
+                
+                document.getElementById('ending-text').innerHTML = endingText;
+            }
+        }
+        
+        let game = new GameState();
+        
+        function startGame() {
+            document.getElementById('game-setup').style.display = 'none';
+            document.getElementById('game-interface').style.display = 'block';
+            game.updateDisplay();
+            game.logEvent("🎮 <strong>Project Phoenix begins!</strong>");
+            game.logEvent("🎯 Your goal: Balance success with reputation management.");
+        }
+        
+        function makeChoice(choice) {
+            game.logEvent(`<br>🎲 <strong>TURN ${game.turn} - You chose: ${choice.toUpperCase()}</strong>`);
+            
+            switch (choice) {
+                case 'continue':
+                    const investment = Math.floor(Math.random() * 20000) + 10000;
+                    game.totalInvestment += investment;
+                    game.successChance -= 0.05;
+                    game.riskLevel += 0.1;
+                    
+                    game.logEvent(`✅ You decide to continue!`);
+                    game.logEvent(`💰 Additional investment: $${investment.toLocaleString()}`);
+                    game.logEvent(`📉 Success chance decreased due to complexity...`);
+                    break;
+                    
+                case 'stop':
+                    game.logEvent(`🛑 You decide to stop the project!`);
+                    game.logEvent(`💔 You take the blame but save everyone from disaster.`);
+                    game.playerReputation -= 40;
+                    game.gameOver = true;
+                    game.endGame("player_stopped");
+                    return;
+                    
+                case 'defer':
+                    game.logEvent(`🔄 You defer the decision to others.`);
+                    game.logEvent(`⚠️ Risk level increases due to diffused responsibility!`);
+                    game.riskLevel *= 1.3;
+                    game.playerReputation -= 5;
+                    break;
+            }
+            
+            if (game.checkDisaster()) return;
+            
+            // Update state
+            game.turn++;
+            game.teamMorale -= 0.05;
+            const marketChange = Math.random() * 0.15 - 0.1;
+            game.successChance += marketChange;
+            game.successChance = Math.max(0.1, Math.min(0.9, game.successChance));
+            
+            // Execute NPC turns
+            setTimeout(() => {
+                game.executeNPCTurns();
+                if (!game.gameOver) {
+                    game.updateDisplay();
+                    
+                    // Check if only player left
+                    if (game.playersLeft <= 1) {
+                        game.logEvent(`🏆 You're the last one standing!`);
+                        game.logEvent(`😱 But you're trapped in this project alone!`);
+                        game.endGame("pyrrhic");
+                    }
+                }
+            }, 1000);
+        }
+        
+        function restartGame() {
+            game = new GameState();
+            document.getElementById('game-over').style.display = 'none';
+            document.getElementById('game-setup').style.display = 'block';
+            document.getElementById('event-log').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
