@@ -1,2 +1,22 @@
-# project-ongoing
-A browser-based Game Theory RPG demonstrating cognitive biases.
+# 🎮 PROJECT: ONGOING
+A Game Theory RPG demonstrating cognitive biases in decision-making.
+
+## 🌐 Play Online
+**[🎯 Play the Web Version](https://trgr-karasutoragara.github.io/project-ongoing/)**
+
+## 🎲 Two Ways to Experience
+
+### 🌟 Web Version (Recommended)
+- **Modern browser-based gameplay**
+- Interactive UI with 1990s retro aesthetics
+- Smooth animations and real-time feedback
+- Perfect for sharing and demonstrations
+
+### 🖥️ Python Terminal Version
+- **Original implementation** that inspired the web version
+- Classic terminal RPG experience
+- Perfect for Python enthusiasts and terminal lovers
+- Retro ASCII art and authentic command-line feel
+
+```bash
+python project_ongoing.py
